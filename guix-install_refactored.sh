@@ -1,6 +1,6 @@
 #!/bin/sh
 # GNU Guix --- Functional package management for GNU
-# 
+#
 
 # We require bash but for portability we'd rather not use /bin/bash or
 # /usr/bin/env int he shebang, hence this hack. :)
@@ -45,4 +45,40 @@ OPENPHP_SIGNING_KEY_ID="3CE454668A84FDC69DB40CFB090B11993D9AEBB5"
 # that it points to root's home directory.
 ROOT_HOME="$(echo ~root)"
 
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+#+UTILITIES
+
+_err() {
+	# All errors go to stderr
+	printf "[%s]: %s\n" "$(date +%s.%3N)" "$1"
+}
+
+_msg() {
+	# Default message to stdout
+	printf "[%s]: %s\n" "$(date +%s.%3N)" "$1"
+}
+
+_debug() {
+	if [ "${DEBUG}" = '1' ]; then
+		printf "[%s]: %s\n" "$(date +%s.%3N)" "$1"
+	fi
+}
+
+
+chk_require() {
+	# Check that every required command is available
+	declare -a warn
+	local c
+
+	_debug "--- [ $FUNCNAME ] ---"
+
+	for c in "$@"; do
+		command -v "$c" &>/dev/null || warn+=("$c")
+	done
+
+	[ "${#warn}" -ne 0 ] &&
+		{ _err "${ERR}Missing commands: ${warn[*]}.";
+			return 1; }
+
+	_msg "${PAS}verification of required commands completed"
+}
